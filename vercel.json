@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "buildCommand": "cd client && npm install && npm run build",
+  "outputDirectory": "client/dist",
+  "env": {
+    "VITE_API_URL": "https://market2-0.onrender.com/api",
+    "VITE_GOOGLE_CLIENT_ID": "669448549528-287d7du362gkl8kqrngik8l0ri8i48gv.apps.googleusercontent.com"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
+  ]
+}
