@@ -3,13 +3,15 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 /**
- * LoginPage - Email/Password login page
+ * RegisterPage - Email/Password registration page
  */
-export default function LoginPage() {
+export default function RegisterPage() {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { register, isAuthenticated } = useAuth();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -26,29 +28,42 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      if (!email || !password) {
-        setError('Email and password are required');
+      // Validation
+      if (!name || !email || !password || !confirmPassword) {
+        setError('All fields are required');
         setLoading(false);
         return;
       }
 
-      await login(email, password);
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters');
+        setLoading(false);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        setLoading(false);
+        return;
+      }
+
+      await register(name, email, password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 py-8">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-8">🏪 Campus Market</h1>
 
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back!</h2>
-          <p className="text-gray-600">Sign in to your account</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Create Account</h2>
+          <p className="text-gray-600">Join our marketplace community</p>
         </div>
 
         {error && (
@@ -58,6 +73,22 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="John Doe"
+              disabled={loading}
+              required
+            />
+          </div>
+
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email Address
@@ -88,6 +119,23 @@ export default function LoginPage() {
               disabled={loading}
               required
             />
+            <p className="text-xs text-gray-500 mt-1">At least 6 characters</p>
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="••••••••"
+              disabled={loading}
+              required
+            />
           </div>
 
           <button
@@ -95,24 +143,26 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 rounded-lg transition duration-200"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
         <div className="text-center">
           <p className="text-gray-600 text-sm">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
-              Register here
+            Already have an account?{' '}
+            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+              Sign in here
             </Link>
           </p>
         </div>
 
         <div className="mt-6 bg-blue-50 rounded-lg p-4 text-sm text-gray-700">
-          <p className="font-semibold text-blue-900 mb-2">💡 Tip:</p>
-          <p className="text-gray-700">
-            New to Campus Market? Create an account to start buying and selling items.
-          </p>
+          <p className="font-semibold text-blue-900 mb-2">✨ Get Started:</p>
+          <ul className="list-disc list-inside space-y-1 text-gray-700 text-xs">
+            <li>Create your profile</li>
+            <li>Start buying and selling</li>
+            <li>Build your reputation</li>
+          </ul>
         </div>
       </div>
     </div>

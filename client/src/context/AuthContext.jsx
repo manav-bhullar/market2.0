@@ -32,10 +32,28 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, [token]);
 
-  // Handle Google login
-  const login = async (googleToken) => {
+  // Handle user registration
+  const register = async (name, email, password) => {
     try {
-      const response = await authAPI.googleLogin(googleToken);
+      const response = await authAPI.register({ name, email, password });
+      const { token: jwtToken, user: userData } = response.data;
+
+      // Store JWT token
+      localStorage.setItem('token', jwtToken);
+      setToken(jwtToken);
+      setUser(userData);
+
+      return userData;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
+  };
+
+  // Handle user login
+  const login = async (email, password) => {
+    try {
+      const response = await authAPI.login({ email, password });
       const { token: jwtToken, user: userData } = response.data;
 
       // Store JWT token
@@ -58,7 +76,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAuthenticated: !!token }}>
       {children}
     </AuthContext.Provider>
   );

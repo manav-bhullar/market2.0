@@ -1,51 +1,90 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const { OAuth2Client } = require('google-auth-library');
-
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 /**
- * Handle Google OAuth login/signup
- * Verifies Google token and creates/updates user in database
- * Returns JWT token for session management
+ * Register a new user with email and password
+ * Validates unique email and hashes password
  */
-exports.googleLogin = async (req, res) => {
+exports.register = async (req, res) => {
   try {
-    const { token } = req.body;
+    const { name, email, password } = req.body;
 
-    if (!token) {
-      return res.status(400).json({ message: 'Token is required' });
+    // Validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required' });
     }
 
-    // Verify Google token
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Create new user
+    const user = new User({
+      name,
+      email: email.toLowerCase(),
+      password,
     });
 
-    const payload = ticket.getPayload();
-    const { sub: googleId, name, email, picture } = payload;
+    await user.save();
 
-    // Find or create user
-    let user = await User.findOne({ googleId });
+    // Generate JWT token
+    const jwtToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
 
-    if (!user) {
-      // Create new user if doesn't exist
-      user = new User({
-        googleId,
-        name,
-        email,
-        photoURL: picture,
-      });
-      await user.save();
-    } else {
-      // Update existing user's photo and name if changed
-      user.name = name;
-      user.photoURL = picture;
-      await user.save();
+    res.status(201).json({
+      message: 'Registration successful',
+      token: jwtToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        photoURL: user.photoURL,
+        averageRating: user.averageRating,
+        itemsSold: user.itemsSold,
+      },
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({
+      message: 'Registration failed',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Login user with email and password
+ * Verifies credentials and returns JWT token
+ */
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    // Generate JWT token with user ID (valid for 7 days)
+    // Find user by email
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Compare password
+    const isPasswordValid = await user.matchPassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Generate JWT token
     const jwtToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     });
@@ -63,9 +102,9 @@ exports.googleLogin = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Google login error:', error);
+    console.error('Login error:', error);
     res.status(500).json({
-      message: 'Authentication failed',
+      message: 'Login failed',
       error: error.message,
     });
   }

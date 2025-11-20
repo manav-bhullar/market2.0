@@ -4,8 +4,11 @@ const authController = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // Public routes
-// POST /auth/google - Handle Google OAuth login
-router.post('/google', authController.googleLogin);
+// POST /auth/register - Register new user
+router.post('/register', authController.register);
+
+// POST /auth/login - Login user
+router.post('/login', authController.login);
 
 // Protected routes (require JWT token)
 // GET /auth/me - Get current logged-in user
