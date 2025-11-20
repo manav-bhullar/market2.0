@@ -2,6 +2,7 @@
   "version": 2,
   "buildCommand": "cd client && npm install && npm run build",
   "outputDirectory": "client/dist",
+  "installCommand": "npm install --prefix client",
   "env": {
     "VITE_API_URL": "https://campus-market-api-le8s.onrender.com/api",
     "VITE_GOOGLE_CLIENT_ID": "669448549528-287d7du362gkl8kqrngik8l0ri8i48gv.apps.googleusercontent.com"
