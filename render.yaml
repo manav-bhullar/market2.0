@@ -6,21 +6,7 @@ services:
     buildCommand: cd server && npm install
     startCommand: cd server && npm start
     envVars:
-      - key: MONGODB_URI
-        value: mongodb+srv://mbhullarbe23_db_user:4woj2BEapK2xj8cK@clustero.j02rtjw.mongodb.net/campus-market?retryWrites=true&w=majority
-      - key: JWT_SECRET
-        value: 9b52846fadb0c4006009a734dced24b599f6491ab277bd093f3ccbfe570a8a88bb292f7b78fa12ed683b5394832ed8c3618569af410f404b41fbf030a1c19198
-      - key: GOOGLE_CLIENT_ID
-        value: 669448549528-287d7du362gkl8kqrngik8l0ri8i48gv.apps.googleusercontent.com
-      - key: GOOGLE_CLIENT_SECRET
-        value: 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
-      - key: CLOUDINARY_CLOUD_NAME
-        value: dvdb8v5vs
-      - key: CLOUDINARY_API_KEY
-        value: 864824592446669
-      - key: CLOUDINARY_API_SECRET
-        value: n5UMSBiAZmZC7uRDwm0KkemG7ug
       - key: NODE_ENV
         value: production
       - key: FRONTEND_URL
-        value: https://campus-marketplace.vercel.app
+        value: https://market2-0.vercel.app
